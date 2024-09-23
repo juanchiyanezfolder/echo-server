@@ -46,6 +46,7 @@ To start the server locally, use the following command:
 #### Option 2: Run in Docker
 
 If you prefer to run the server in a Docker container, follow these steps:
+
 1- Build the Docker image:
 
 `docker build -t echo-server`
