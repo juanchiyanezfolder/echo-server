@@ -1,0 +1,12 @@
+{
+    "name": "echo-server",
+    "version": "1.0.0",
+    "description": "Simple Echo Server using Node.js",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "querystring": "^0.2.0"
+    }
+}
