@@ -67,13 +67,13 @@ Here’s an example of how to send a POST request with JSON data:
 `curl -X POST http://localhost:8083/echo -H "Content-Type: application/json" -d '{"message": "Hello!"}'`
 
 ### Using Postman
-1- Open Postman.
-2- Set the request type to POST.
-3- Enter the URL: http://localhost:8083/echo.
-4- In the Headers tab, add:
-5- Key: Content-Type
-6- Value: application/json
-7- In the Body tab, select raw and enter your JSON data:
+##### 1- Open Postman.
+##### 2- Set the request type to POST.
+##### 3- Enter the URL: http://localhost:8083/echo.
+##### 4- In the Headers tab, add:
+##### 5- Key: Content-Type
+##### 6- Value: application/json
+##### 7- In the Body tab, select raw and enter your JSON data:
 
 ```json
 {
