@@ -1,4 +1,5 @@
-const http = require('http');
+const express = require('express');
+const jwt = require('jsonwebtoken');
 const url = require('url');
 const querystring = require('querystring');
 
@@ -6,64 +7,79 @@ const querystring = require('querystring');
 const host = '0.0.0.0';
 const port = 8083;
 
-// Create the HTTP server
-const server = http.createServer((req, res) => {
-    let body = [];
+const JWT_SECRET_KEY = 'dummy_private_key_for_testing'; // Dummy private key for JWT signing
 
+// Initialize Express app
+const app = express();
+
+// Middleware to parse incoming JSON requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Mock OAuth /oauth/token endpoint for testing purposes
+app.post('/oauth/token', (req, res) => {
+    const { grant_type, client_id, client_secret } = req.body;
+
+    // Simulate a client credentials grant type flow
+    if (grant_type !== 'client_credentials') {
+        return res.status(400).json({
+            error: 'unsupported_grant_type',
+            error_description: 'Only client_credentials grant type is supported'
+        });
+    }
+
+    // Create a JWT token payload with the provided client_id
+    const tokenPayload = {
+        client_id,
+    };
+
+    // Sign the JWT token with the dummy private key and set expiration to 1 hour
+    const accessToken = jwt.sign(tokenPayload, JWT_SECRET_KEY, { expiresIn: '1h' });
+
+    // Return the access token and token details
+    return res.status(200).json({
+        access_token: accessToken,
+        token_type: 'Bearer',
+        expires_in: 3600, // Token expiration in seconds (1 hour)
+    });
+});
+
+// Route to handle all incoming requests
+app.all('*', (req, res) => {
     // Parse the URL and query parameters
     const uri = url.parse(req.url, true);
     const queryParams = querystring.parse(uri.query);
     const status = queryParams.status || 200;
 
-    // Set response headers
-    res.setHeader('Content-Type', 'application/json');
-
     // Log basic request info
-    console.log(`\nReceived ${req.method
-        } request for: ${req.url
-        }`);
+    console.log(`\nReceived ${req.method} request for: ${req.url}`);
     console.log('> Headers:', req.headers);
 
-    // Handle request body chunks
-    req.on('data', chunk => {
-        body.push(chunk);
-    });
+    // Log request body if present
+    console.log('> Request Body:', req.body || 'No Body');
 
-    // Handle the end of the request
-    req.on('end', () => {
-        // Process the body
-        body = Buffer.concat(body).toString();
+    // Build the response object
+    const responseBody = {
+        method: req.method,
+        path: uri.pathname,
+        headers: req.headers,
+        query: queryParams,
+        body: req.body || null
+    };
 
-        // Log request details
-        console.log('> Request Body:', body || 'No Body');
+    // Send the response
+    res.status(status).json(responseBody);
+});
 
-        // Respond with the echoed request details
-        const responseBody = {
-            method: req.method,
-            path: uri.pathname,
-            headers: req.headers,
-            query: queryParams,
-            body: body ? JSON.parse(body) : null
-        };
-
-        // Send response
-        res.statusCode = status;
-        res.end(JSON.stringify(responseBody,
-            null,
-            2));
-    });
-
-    // Error handling
-    req.on('error', err => {
-        console.error('Error handling request:', err.message);
-        res.statusCode = 500;
-        res.end(JSON.stringify({
-            error: 'Internal Server Error'
-        }));
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error handling request:', err.message);
+    res.status(500).json({
+        error: 'Internal Server Error'
     });
 });
 
 // Start the server
-server.listen(port, host, () => {
+app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}`);
 });

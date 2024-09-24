@@ -10,6 +10,7 @@ The Echo Server is a simple Node.js application designed to handle HTTP requests
 - **Echoes request body**: Returns the body of the incoming request.
 - **Customizable status codes**: Allows specifying HTTP response status codes via query parameters.
 - **Detailed request logging**: Outputs request method, URL, headers, and body for debugging.
+- **OAuth Token Endpoint**: Simulates OAuth authentication by generating a JWT access token using `client_id` and `client_secret`.
 
 ## Prerequisites
 
@@ -88,3 +89,30 @@ You can customize the HTTP response status code by adding a status query paramet
 
 ### Logging Requests
 The server logs the details of each incoming request to the console, including the method, URL, headers, and body. This is useful for debugging and understanding server behavior.
+
+### Testing the OAuth Token Endpoint
+The /oauth/token endpoint simulates an OAuth token generation for testing purposes. It accepts client_id and client_secret, and generates a JWT access token.
+
+#### Request
+##### 1- Method: `POST`
+##### 2- URL: /oauth/token
+##### 3- Headers: Content-Type: application/x-www-form-urlencoded
+##### 4- Body Parameters:
+
+```json
+{
+    "grant_type": "client_credentials", //Must be "client_credentials"
+    "client_id": "Your OAuth client ID",
+    "client_secret": "Your OAuth client secret"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
