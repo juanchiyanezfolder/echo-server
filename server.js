@@ -16,9 +16,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware to set the request time for each request
+app.use((req, res, next) => {
+    req.requestTime = new Date();
+    next();
+});
+
 // Mock OAuth /oauth/token endpoint for testing purposes
 app.post('/oauth/token', (req, res) => {
     const { grant_type, client_id, client_secret } = req.body;
+
+    // Log request time for this endpoint call
+    console.log(`\n[${req.requestTime.toISOString()}] POST /oauth/token endpoint called`);
 
     // Simulate a client credentials grant type flow
     if (grant_type !== 'client_credentials') {
@@ -51,8 +60,8 @@ app.all('*', (req, res) => {
     const queryParams = querystring.parse(uri.query);
     const status = queryParams.status || 200;
 
-    // Log basic request info
-    console.log(`\nReceived ${req.method} request for: ${req.url}`);
+    // Log basic request info with timestamp
+    console.log(`\n[${req.requestTime.toISOString()}] Received ${req.method} request for: ${req.url}`);
     console.log('> Headers:', req.headers);
 
     // Log request body if present
@@ -73,7 +82,8 @@ app.all('*', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Error handling request:', err.message);
+    const errorTime = req.requestTime ? req.requestTime.toISOString() : new Date().toISOString();
+    console.error(`[${errorTime}] Error handling request:`, err.message);
     res.status(500).json({
         error: 'Internal Server Error'
     });
@@ -81,5 +91,5 @@ app.use((err, req, res, next) => {
 
 // Start the server
 app.listen(port, host, () => {
-    console.log(`Server running at http://${host}:${port}`);
+    console.log(`[${new Date().toISOString()}] Server running at http://${host}:${port}`);
 });
